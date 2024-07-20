@@ -1,0 +1,92 @@
+#include <iostream>
+
+using namespace std;
+
+template <typename T>
+class Array {
+private:
+    T* data_;
+    int size_;
+    int capacity_;
+
+public:
+    Array() : size_(0), capacity_(0), data_(nullptr) {}
+
+    ~Array() {
+        delete[] data_;
+    }
+
+    int GetSize() const {
+        return size_;
+    }
+
+    void SetSize(int newSize, int grow = 1) {
+        if (newSize > capacity_) {
+            capacity_ = newSize + (newSize / grow) * grow;
+            T* newData = new T[capacity_];
+            for (int i = 0; i < size_; ++i) {
+                newData[i] = data_[i];
+            }
+            delete[] data_;
+            data_ = newData;
+        } else if (newSize < size_) {
+            for (int i = newSize; i < size_; ++i) {
+                data_[i].~T();
+            }
+            size_ = newSize;
+        }
+    }
+
+    int GetUpperBound() const {
+        return size_ - 1;
+    }
+
+    bool IsEmpty() const {
+        return size_ == 0;
+    }
+
+    void FreeExtra() {
+        if (size_ < capacity_) {
+            T* newData = new T[size_];
+            for (int i = 0; i < size_; ++i) {
+                newData[i] = data_[i];
+            }
+            delete[] data_;
+            data_ = newData;
+            capacity_ = size_;
+        }
+    }
+
+    void RemoveAll() {
+        for (int i = 0; i < size_; ++i) {
+            data_[i].~T();
+        }
+        size_ = 0;
+    }
+
+    T& operator[](int index) {
+        return data_[index];
+    }
+
+    const T& operator[](int index) const {
+        return data_[index];
+    }
+};
+
+int main() {
+    Array<int> arr;
+    arr.SetSize(5);
+    for (int i = 0; i < 5; ++i) {
+        arr[i] = i * 2;
+    }
+    cout << "Size: " << arr.GetSize() << endl;
+    cout << "Upper bound: " << arr.GetUpperBound() << endl;
+    for (int i = 0; i < arr.GetSize(); ++i) {
+        cout << arr[i] << " ";
+    }
+    cout << endl;
+    arr.FreeExtra();
+    arr.RemoveAll();
+    cout << "Size after RemoveAll: " << arr.GetSize() << endl;
+    return 0;
+}
